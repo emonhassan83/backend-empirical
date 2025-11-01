@@ -1,0 +1,43 @@
+import { Model, Types } from 'mongoose'
+import { TUserRole, TUserStatus } from './user.constant'
+
+export interface TUser {
+  _id: Types.ObjectId
+  id: string
+  name: string
+  email: string
+  password: string
+  photoUrl?: string
+  contractNo: string
+  role: TUserRole
+  needsPasswordChange: boolean
+  passwordChangedAt?: Date
+  verification: {
+    otp: string | number
+    expiresAt: Date
+    status: boolean
+  }
+  status: TUserStatus
+  expireAt: Date
+  isDeleted: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+export interface TReqUser {
+  _id: string
+  email: string
+  role: TUserRole
+  iat: number
+  exp: number
+}
+
+export interface UserModel extends Model<TUser> {
+  isUserExistsByUserName(name: string): Promise<TUser>
+  isUserExistsByEmail(email: string): Promise<TUser>
+
+  isPasswordMatched(
+    plainTextPassword: string,
+    hashedPassword: string,
+  ): Promise<boolean>
+}
