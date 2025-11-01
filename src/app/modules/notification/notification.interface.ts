@@ -3,12 +3,8 @@ import { Types } from 'mongoose'
 export enum modeType {
   Auth = 'Auth',
   User = 'User',
-  UserSubscription = 'UserSubscription',
-  VendorSubscription = 'VendorSubscription',
-  Contents = 'Contents',
+  Product = 'Product',
   Cart = 'Cart',
-  AlbumRequest = 'AlbumRequest',
-  ReviewReport = 'ReviewReport',
   Payment = 'Payment',
 }
 

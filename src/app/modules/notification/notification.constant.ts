@@ -13,26 +13,9 @@ export const messages = {
   cartManagement: {
     addCart: 'Cart product added !'
   },
-
-  albumRequest: {
-    createRequest: 'Album request submitted',
-    statusChangeAlbumRequest: 'AAlbum request status updated',
+  product: {
+    added: 'Discount product added to store !',
   },
-
-  reviewReportManagement: {
-    createReviewReport: 'Review report request added !',
-    changeStatusReviewReport: 'Review report status updated !',
-  },
-
-  subscription: {
-    newPlan: 'New subscription plan added.',
-    warningForPlan: "Alert for add new plan"
-  },
-
-  settings: {
-    systemUpdated: 'System settings updated.',
-  },
-
   paymentManagement: {
     paymentSuccess: 'Payment was successful !',
     paymentRefunded: 'Payment refunded successfully.',
