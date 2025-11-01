@@ -17,7 +17,7 @@ async function main() {
 
     // set here default task
     seeder.seedAdmin()
-    // seeder.seedContents()
+    seeder.seedContents()
 
     server = app.listen(Number(config.port), config.ip as string, () => {
       console.log(`app is listening on port ${config.port}`)

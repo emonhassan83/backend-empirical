@@ -1,12 +1,12 @@
-## **airsoft-photography-backend**
+## **empirical-backend**
 
 #### **Setup Instructions**
 
 ##### **1. Clone the Repository**
 
 ```bash
-git clone https://github.com/bdCalling-Sdt-hub/airsoft-photography-backend.git
-cd airsoft-photography-backend
+git clone https://github.com/bdCalling-Sdt-hub/empirical-backend.git
+cd empirical-backend
 ```
 
 ##### **2. Configure Environment Variables**
