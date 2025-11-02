@@ -3,13 +3,18 @@ import AppError from '../../errors/AppError'
 import { TUser } from './user.interface'
 import { User } from './user.model'
 import QueryBuilder from '../../builder/QueryBuilder'
-import { UserSearchableFields } from './user.constant'
+import { USER_ROLE, UserSearchableFields } from './user.constant'
 import {
   sendUserStatusNotifYToAdmin,
   sendUserStatusNotifYToUser,
 } from './user.utils'
 
 const registerUserIntoDB = async (payload: TUser) => {
+  const { password, confirmPassword } = payload
+  if (password !== confirmPassword) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Passwords do not match')
+  }
+
   // 🚫 Prevent admin role assignment by user
   if (payload.role === 'admin') {
     throw new AppError(
@@ -54,8 +59,8 @@ const registerUserIntoDB = async (payload: TUser) => {
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   const usersQuery = new QueryBuilder(
-    User.find({ isDeleted: false }).select(
-      '_id id fullname username email role photoUrl status createdAt',
+    User.find({ isDeleted: false, role: { $ne: USER_ROLE.admin } }).select(
+      '_id id name email photoUrl contractNo status createdAt',
     ),
     query,
   )
@@ -68,10 +73,6 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   const result = await usersQuery.modelQuery
   const meta = await usersQuery.countTotal()
 
-  if (!usersQuery) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Users not found!')
-  }
-
   return {
     meta,
     result,
@@ -80,7 +81,7 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
 
 const geUserByIdFromDB = async (id: string) => {
   const user = await User.findById(id).select(
-    '__id id fullname username email bio role photoUrl contractNo address status createdAt',
+    '__id id  name email photoUrl contractNo status createdAt',
   )
   if (!user || user?.isDeleted) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found!')
@@ -94,18 +95,15 @@ const changeUserStatusFromDB = async (payload: any) => {
 
   //* if the user is is not exist
   const user = await User.findById(userId)
-  if (!user) {
+  if (!user || user?.isDeleted) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found!')
-  }
-  if (user?.isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !')
   }
 
   const updateUserStatus = await User.findByIdAndUpdate(
     userId,
     { status },
     { new: true },
-  ).select('_id id fullname username email photoUrl status')
+  ).select('_id id name email photoUrl status')
   if (!updateUserStatus) {
     throw new AppError(
       httpStatus.NOT_FOUND,
@@ -128,11 +126,8 @@ const updateUserInfoFromDB = async (
 ) => {
   //* if the user is is not exist
   const user = await User.findById(userId)
-  if (!user) {
+  if (!user || user?.isDeleted) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found!')
-  }
-  if (user?.isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !')
   }
 
   //* checking if the user is blocked
@@ -143,7 +138,7 @@ const updateUserInfoFromDB = async (
 
   const updatedUser = await User.findByIdAndUpdate(userId, payload, {
     new: true,
-  }).select('_id id fullname username email photoUrl status')
+  }).select('_id id name email photoUrl status')
   if (!updatedUser) {
     throw new AppError(
       httpStatus.NOT_FOUND,
@@ -157,25 +152,22 @@ const updateUserInfoFromDB = async (
 const deleteAUserFromDB = async (userId: string) => {
   //* Check if the user exists
   const user = await User.findById(userId).select('_id')
-  if (!user) {
+  if (!user || user?.isDeleted) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found!')
-  }
-  if (user?.isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, 'This user is already deleted !')
   }
 
   // Use `Promise.all` to execute updates in parallel
-  const updatedUser = await User.findByIdAndUpdate(
+  const result = await User.findByIdAndUpdate(
     userId,
     { isDeleted: true },
     { new: true },
-  ).select('_id id fullname username email photoUrl status')
+  ).select('_id id name email photoUrl status')
 
-  if (!updatedUser) {
+  if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'Failed to update user status!')
   }
 
-  return updatedUser
+  return result
 }
 
 export const UserService = {

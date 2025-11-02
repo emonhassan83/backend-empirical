@@ -122,7 +122,7 @@ const resendOtp = async (email: string) => {
           <p style="color: #555; margin-top: 10px;">Dear ${user?.name},</p>
           <p style="color: #555;">Use the following One-Time Password (OTP) to proceed with your request. This OTP is valid for a limited time.</p>
           <div style="text-align: center; margin: 20px 0;">
-            <span style="background-color: #F28F00; color: white; padding: 10px 20px; font-size: 18px; font-weight: bold; border-radius: 5px; display: inline-block;">
+            <span style="padding: 10px 20px; font-size: 18px; font-weight: bold; border-radius: 5px; display: inline-block;">
               ${otp}
             </span>
           </div>

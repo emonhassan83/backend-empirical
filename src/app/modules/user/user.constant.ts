@@ -11,4 +11,4 @@ export const USER_STATUS = {
 export type TUserRole = keyof typeof USER_ROLE
 export type TUserStatus = keyof typeof USER_STATUS
 
-export const UserSearchableFields = ['id', 'fullname', 'username', 'email', 'role', 'status']
+export const UserSearchableFields = ['id', 'name']

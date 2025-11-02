@@ -6,12 +6,16 @@ import { UploadedFiles } from '../../interface/common.interface'
 import { uploadManyToS3 } from '../../utils/s3'
 import AppError from '../../errors/AppError'
 import { User } from '../user/user.model'
+import { calculateStockFromSizes } from './product.utils'
 
-const createProduct = async (user: any, files: any, payload: TProduct) => {
-  const userData = await User.findById(user?._id)
-  if (!userData || userData?.isDeleted) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Vendor not found!')
+const createProduct = async (userId: string, files: any, payload: TProduct) => {
+  const user = await User.findById(userId)
+  if (!user || user?.isDeleted) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User profile not found!')
   }
+
+  // Set author
+  payload.author = user._id
 
   // here upload file
   if (files) {
@@ -34,6 +38,11 @@ const createProduct = async (user: any, files: any, payload: TProduct) => {
     }
   }
 
+  // Auto stock calculation if size array provided
+  if (payload.size && payload.size.length > 0) {
+    payload.stock = calculateStockFromSizes(payload.size)
+  }
+
   const result = await Product.create(payload)
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Product creation failed')
@@ -43,21 +52,28 @@ const createProduct = async (user: any, files: any, payload: TProduct) => {
 }
 
 const getAllProduct = async (queries: Record<string, any> = {}) => {
-  const { priceRange, avgRating, ...query } = queries
+  const { priceRange, ...query } = queries
 
   const productModel = new QueryBuilder(
     Product.find({ isDeleted: false }),
     query,
   )
-    .search(['name', 'id', 'category'])
+    .search(['title'])
     .filter()
     .rangeFilter('price', priceRange)
     .sort()
     .paginate()
     .fields()
 
-  const data = await productModel.modelQuery
+  let data = await productModel.modelQuery
   const meta = await productModel.countTotal()
+
+  // Add computed fields
+  data = data.map((p: any) => ({
+    ...p.toObject(),
+    isStock: p.stock > 0,
+    discountPrice: p.price - (p.price * (p.discount || 0)) / 100,
+  }))
 
   return {
     meta,
@@ -67,13 +83,19 @@ const getAllProduct = async (queries: Record<string, any> = {}) => {
 
 const getProductById = async (id: string): Promise<any> => {
   const product = await Product.findById(id).populate([
-    { path: 'author', select: 'id name email photoUrl' },
+    { path: 'author', select: 'id name email photoUrl contractNo' },
   ])
   if (!product || product?.isDeleted) {
     throw new AppError(httpStatus.NOT_FOUND, 'Product not found')
   }
 
-  return product
+  const productObj = product.toObject()
+  return {
+    ...productObj,
+    isStock: productObj.stock > 0,
+    discountPrice:
+      productObj.price - (productObj.price * (productObj.discount || 0)) / 100,
+  }
 }
 
 const updateProduct = async (
@@ -81,44 +103,34 @@ const updateProduct = async (
   files: any,
   payload: Partial<TProduct>,
 ) => {
-   // here upload file
+  // Handle image uploads
   if (files) {
     const { images } = files as UploadedFiles
-
-    // Upload product images
     if (images?.length) {
-      const imgsArray: { file: any; path: string; key?: string }[] = []
-
-      images.forEach((image) => {
-        imgsArray.push({
-          file: image,
-          path: `images/product`,
-        })
-      })
+      const imgsArray = images.map((image) => ({
+        file: image,
+        path: `images/product`,
+      }))
 
       const uploaded = await uploadManyToS3(imgsArray)
-      // map to string[] (urls) if TProduct.images expects string[]
-      payload.images = uploaded.map((u: { url: string; key?: string }) => u.url)
+      payload.images = uploaded.map((u: { url: string }) => u.url)
     }
   }
 
-  // Update other product details
-  try {
-    const result = await Product.findByIdAndUpdate(id, payload, {
-      new: true,
-    })
-    if (!result) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Product update failed')
-    }
-  
-    return result
-  } catch (error) {
-    console.log(error)
-    throw new AppError(
-      httpStatus.INTERNAL_SERVER_ERROR,
-      'Product update failed',
-    )
+  // If size array is being updated → recalc stock
+  if (payload.size && payload.size.length > 0) {
+    payload.stock = calculateStockFromSizes(payload.size)
   }
+
+  const result = await Product.findByIdAndUpdate(id, payload, {
+    new: true,
+  })
+
+  if (!result) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Product update failed')
+  }
+
+  return result
 }
 
 const deleteProduct = async (id: string) => {

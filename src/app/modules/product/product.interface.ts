@@ -1,26 +1,20 @@
 import { Model, Types } from 'mongoose'
+import { TProductSize } from './product.constants'
 
 export interface TProduct {
-  deleteKey?: string[]
   id: string
   author: Types.ObjectId
-  name: string
+  title: string
   images: string[]
   description: string
   stock: number
-  sales: number
+  sale: number
   price: number
   discount: number
   size?: {
-    type: string
+    type: TProductSize
     quantity: number
   }[]
-  shippingCharge?: {
-    country: string
-    price: number
-  }[]
-  avgRating: number
-  ratingCount: number
   isDeleted: boolean
 }
 

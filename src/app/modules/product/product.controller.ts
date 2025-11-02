@@ -7,7 +7,7 @@ import { findAdmin } from '../../utils/findAdmin'
 
 const createProduct = catchAsync(async (req: Request, res: Response) => {
   const result = await productService.createProduct(
-    req.user,
+    req.user._id,
     req.files,
     req.body,
   )

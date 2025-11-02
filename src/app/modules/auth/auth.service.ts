@@ -18,11 +18,8 @@ import moment from 'moment'
 const loginUser = async (payload: TLoginUser) => {
   //* checking if the user is exist
   const user = await User.isUserExistsByEmail(payload.email)
-  if (!user) {
+  if (!user || user?.isDeleted) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !')
-  }
-  if (user?.isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !')
   }
 
   //* checking if the password is correct
@@ -72,11 +69,8 @@ const changePassword = async (
 ) => {
   //* checking if the user is exist
   const user = await User.isUserExistsByEmail(userData?.email)
-  if (!user) {
+  if (!user || user?.isDeleted) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !')
-  }
-  if (user?.isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !')
   }
 
   //* checking if the password is correct
@@ -124,11 +118,8 @@ const refreshToken = async (token: string) => {
 
   //* checking if the user is exist
   const user = await User.isUserExistsByEmail(decoded?.email)
-  if (!user) {
+  if (!user || user?.isDeleted) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !')
-  }
-  if (user?.isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !')
   }
 
   const jwtPayload = {
@@ -151,11 +142,8 @@ const refreshToken = async (token: string) => {
 const forgetPassword = async (payload: { email: string }) => {
   //* checking if the user is exist
   const user = await User.isUserExistsByEmail(payload.email)
-  if (!user) {
+  if (!user || user?.isDeleted) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !')
-  }
-  if (user?.isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !')
   }
 
   //* create token and sent to the  client
@@ -194,7 +182,7 @@ const forgetPassword = async (payload: { email: string }) => {
           <p style="color: #555; margin-top: 10px;">Dear ${user?.name},</p>
           <p style="color: #555;">Use the following One-Time Password (OTP) to proceed with your request. This OTP is valid for a limited time.</p>
           <div style="text-align: center; margin: 20px 0;">
-            <span style="background-color: #background: #F28F00; color: white; padding: 10px 20px; font-size: 18px; font-weight: bold; border-radius: 5px; display: inline-block;">
+            <span style="padding: 10px 20px; font-size: 18px; font-weight: bold; border-radius: 5px; display: inline-block;">
               ${otp}
             </span>
           </div>
@@ -221,11 +209,8 @@ const resetPassword = async (
 ) => {
   //* checking if the user is exist
   const user = await User.isUserExistsByEmail(payload?.email)
-  if (!user) {
+  if (!user || user?.isDeleted) {
     throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !')
-  }
-  if (user?.isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !')
   }
 
   // if session is expired

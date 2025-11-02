@@ -1,6 +1,7 @@
 import { model, Schema } from 'mongoose'
 import { TProduct, TProductModel } from './product.interface'
 import { generateCryptoString } from '../../utils/generateCryptoString'
+import { PRODUCT_SIZE } from './product.constants'
 
 const productSchema = new Schema<TProduct>(
   {
@@ -14,7 +15,7 @@ const productSchema = new Schema<TProduct>(
       ref: 'User',
       required: true,
     },
-    name: {
+    title: {
       type: String,
       required: true,
     },
@@ -32,7 +33,7 @@ const productSchema = new Schema<TProduct>(
       default: 1,
       required: true,
     },
-    sales: {
+    sale: {
       type: Number,
       default: 0,
       required: true,
@@ -53,22 +54,15 @@ const productSchema = new Schema<TProduct>(
           _id: false, // Prevent _id from being created
           type: {
             type: String,
-            default: null,
+            enum: Object.keys(PRODUCT_SIZE),
+            default: PRODUCT_SIZE.free_size,
           },
           quantity: {
             type: Number,
-            default: 0,
+            default: 1,
           },
         },
       ],
-    },
-    avgRating: {
-      type: Number,
-      default: 0,
-    },
-    ratingCount: {
-      type: Number,
-      default: 0,
     },
     isDeleted: {
       type: Boolean,

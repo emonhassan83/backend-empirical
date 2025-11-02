@@ -1,9 +1,10 @@
 import { z } from 'zod'
+import { PRODUCT_SIZE } from './product.constants'
 
 const createProductSchema = z.object({
   body: z.object({
-    name: z.string({
-      required_error: 'Product name is required!',
+    title: z.string({
+      required_error: 'Product title is required!',
     }),
     description: z
       .string({
@@ -29,22 +30,23 @@ const createProductSchema = z.object({
       .min(0, 'Discount cannot be negative')
       .max(100, 'Discount cannot exceed 100%')
       .default(0),
-    size: z
-      .array(
-        z.object({
-          type: z.string().optional(),
-          quantity: z
-            .number()
-            .min(0, 'Size quantity cannot be negative')
-            .default(0),
+    size: z.array(
+      z.object({
+        type: z.enum(Object.values(PRODUCT_SIZE) as [string, ...string[]], {
+          required_error: 'Product size is required!',
         }),
-      )
+        quantity: z
+          .number()
+          .min(1, 'Size quantity must be at least 1')
+          .default(1),
+      }),
+    ),
   }),
 })
 
 const updateProductSchema = z.object({
   body: z.object({
-    name: z.string().optional(),
+    title: z.string().optional(),
     description: z.string().min(10).optional(),
     stock: z.number().int().min(0).optional(),
     price: z.number().positive().optional(),
@@ -52,15 +54,19 @@ const updateProductSchema = z.object({
     size: z
       .array(
         z.object({
-          type: z.string().optional(),
-          quantity: z.number().min(0).optional(),
+          type: z
+            .enum(Object.values(PRODUCT_SIZE) as [string, ...string[]], {
+              required_error: 'Product size is required!',
+            })
+            .optional(),
+          quantity: z.number().min(1).optional(),
         }),
       )
-      .optional()
+      .optional(),
   }),
 })
 
 export const productValidation = {
   createProductSchema,
-  updateProductSchema
+  updateProductSchema,
 }

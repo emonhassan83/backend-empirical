@@ -20,3 +20,9 @@ export const DeleteProductImages = async (id: string, keys: string[]) => {
     deleteManyFromS3(newKeys);
   }
 };
+
+// Helper to calculate total stock from sizes
+export const calculateStockFromSizes = (sizes?: { type: string; quantity: number }[]) => {
+  if (!sizes || !sizes.length) return 0
+  return sizes.reduce((total, size) => total + (size.quantity || 0), 0)
+}
