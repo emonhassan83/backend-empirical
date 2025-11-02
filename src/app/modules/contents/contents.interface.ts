@@ -11,6 +11,9 @@ export interface TContents {
   termsAndConditions?: string
   privacyPolicy?: string
   supports?: string
+  philosophyImage?: string
+  philosophyAboutUs?: string
+  philosophyImpact?: string
   createdBy: Types.ObjectId
   isDeleted?: boolean
 }

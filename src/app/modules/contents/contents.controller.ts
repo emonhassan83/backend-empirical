@@ -14,28 +14,27 @@ const createContents = catchAsync(async (req: Request, res: Response) => {
   })
 })
 
-// Get all contents
-const getAllContents = catchAsync(async (req: Request, res: Response) => {
-  const result = await contentsService.getAllContents(req.query)
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Contents retrieved successfully',
-    meta: result.meta,
-    data: result.data,
-  })
-})
-
-// Get contents by ID
-const getContentsById = catchAsync(async (req: Request, res: Response) => {
-  const result = await contentsService.getContentsById(req.params.id)
+// Get content
+const getContent = catchAsync(async (req: Request, res: Response) => {
+  const result = await contentsService.getContent(req.query)
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Content retrieved successfully',
-    data: result,
+    data: result.data[0],
+  })
+})
+
+// Get Philosophy Content
+const getPhilosophyContent = catchAsync(async (req: Request, res: Response) => {
+  const result = await contentsService.getPhilosophyContent(req.query)
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Philosophy content retrieved successfully',
+    data: result.data[0],
   })
 })
 
@@ -51,22 +50,22 @@ const updateContents = catchAsync(async (req: Request, res: Response) => {
   })
 })
 
-// Delete contents
-const deleteContents = catchAsync(async (req: Request, res: Response) => {
-  const result = await contentsService.deleteContents(req.params.id)
+// Update contents
+const updatePhilosophyContent = catchAsync(async (req: Request, res: Response) => {
+  const result = await contentsService.updatePhilosophyContent(req.body, req.file)
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Content deleted successfully',
+    message: 'Philosophy content updated successfully',
     data: result,
   })
 })
 
 export const contentsController = {
   createContents,
-  getAllContents,
-  getContentsById,
+  getContent,
+  getPhilosophyContent,
   updateContents,
-  deleteContents,
+  updatePhilosophyContent,
 }

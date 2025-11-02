@@ -38,6 +38,9 @@ const seedContents = async () => {
       termsAndConditions: '',
       privacyPolicy: '',
       supports: '',
+      philosophyImage: null,
+      philosophyAboutUs: '',
+      philosophyImpact: '',
       createdBy: admin?._id,
     })
 

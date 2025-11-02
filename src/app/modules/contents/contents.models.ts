@@ -15,6 +15,15 @@ const contentsSchema = new Schema<TContents>(
     supports: {
       type: String,
     },
+    philosophyImage: {
+      type: String,
+    },
+    philosophyAboutUs: {
+      type: String,
+    },
+    philosophyImpact: {
+      type: String,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

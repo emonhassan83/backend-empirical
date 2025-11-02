@@ -1,18 +1,5 @@
 import { z } from 'zod'
 
-const globalPriceSchema = z.object({
-  eachPrice: z
-    .number({
-      required_error: 'Global each photo price is required',
-    })
-    .optional(),
-  totalPrice: z
-    .number({
-      required_error: 'Global total photo price is required',
-    })
-    .optional(),
-})
-
 const createValidationSchema = z.object({
   body: z.object({
     aboutUs: z.string({ required_error: 'about us is required' }).optional(),
@@ -25,7 +12,6 @@ const createValidationSchema = z.object({
     supports: z
       .string({ required_error: 'supports us is required' })
       .optional(),
-    globalPrice: globalPriceSchema.optional(),
   }),
 })
 
@@ -41,12 +27,22 @@ const updateValidationSchema = z.object({
     supports: z
       .string({ required_error: 'supports us is required' })
       .optional(),
-    globalPrice: globalPriceSchema.optional(),
-    createBy: z.string({ required_error: 'createBy is required' }).optional(),
+  }),
+})
+
+const updatePhilosophyValidationSchema = z.object({
+  body: z.object({
+    philosophyAboutUs: z
+      .string({ required_error: 'philosophy about us is required' })
+      .optional(),
+    philosophyImpact: z
+      .string({ required_error: 'philosophy impact is required' })
+      .optional(),
   }),
 })
 
 export const contentsValidation = {
   createValidationSchema,
   updateValidationSchema,
+  updatePhilosophyValidationSchema,
 }
