@@ -1,5 +1,5 @@
 import { model, Schema } from 'mongoose'
-import { ITEM_MODEL_TYPE, TItems, TItemsModel } from './items.interface'
+import { TItems, TItemsModel } from './items.interface'
 
 const itemsSchema = new Schema<TItems>(
   {
@@ -12,10 +12,6 @@ const itemsSchema = new Schema<TItems>(
       type: Schema.Types.ObjectId,
       ref: 'Product',
       required: [true, 'Product id is required'],
-    },
-    author: {
-      type: Schema.Types.ObjectId,
-      ref: 'User'
     },
     quantity: {
       type: Number,
