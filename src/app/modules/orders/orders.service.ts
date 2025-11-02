@@ -85,27 +85,23 @@ const createOrders = async (payload: any) => {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create order items')
     }
 
-    // ✅ Update Product stock and sale count
-    for (const item of items) {
-      await Product.findByIdAndUpdate(
-        item.product,
-        {
-          $inc: { stock: -item.quantity, sale: item.quantity },
-        },
-        { session, new: true },
-      )
-    }
+    // // ✅ Update Product stock and sale count
+    // for (const item of items) {
+    //   await Product.findByIdAndUpdate(
+    //     item.product,
+    //     {
+    //       $inc: { stock: -item.quantity, sale: item.quantity },
+    //     },
+    //     { session, new: true },
+    //   )
+    // }
 
     await session.commitTransaction()
     session.endSession()
 
     return {
-      success: true,
-      message: 'Order created successfully',
-      data: {
-        order,
-        items: createdItems,
-      },
+      order,
+      items: createdItems,
     }
   } catch (error) {
     await session.abortTransaction()
