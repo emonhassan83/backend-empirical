@@ -10,6 +10,7 @@ import { EventRoutes } from '../modules/event/event.route'
 import { GalleryRoutes } from '../modules/gallery/gallery.route'
 import { CartRoutes } from '../modules/cart/cart.route'
 import { OrdersRoutes } from '../modules/orders/orders.route'
+import { PaymentRoutes } from '../modules/payment/payment.route'
 
 const router = Router()
 
@@ -37,6 +38,10 @@ const moduleRoutes = [
   {
     path: '/orders',
     route: OrdersRoutes,
+  },
+  {
+    path: '/payments',
+    route: PaymentRoutes,
   },
   {
     path: '/galleries',
