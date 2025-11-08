@@ -70,7 +70,7 @@ export const paymentNotifyToAdmin = async (
     receiver: admin?._id,
     message,
     description,
-    reference: payment.orderId,
+    reference: payment.order,
     model_type: modeType.Payment,
   })
 }
@@ -92,10 +92,10 @@ export const paymentNotifyToUser = async (
 
   // Create a notification entry
   await NotificationService.createNotificationIntoDB({
-    receiver: payment?.userId,
+    receiver: payment?.user,
     message,
     description,
-    reference: payment.orderId,
+    reference: payment.order,
     model_type: modeType.Payment,
   })
 }

@@ -11,6 +11,7 @@ import { GalleryRoutes } from '../modules/gallery/gallery.route'
 import { CartRoutes } from '../modules/cart/cart.route'
 import { OrdersRoutes } from '../modules/orders/orders.route'
 import { PaymentRoutes } from '../modules/payment/payment.route'
+import { MetaRoutes } from '../modules/meta/meta.route'
 
 const router = Router()
 
@@ -62,6 +63,10 @@ const moduleRoutes = [
   {
     path: '/notifications',
     route: NotificationRoutes,
+  },
+  {
+    path: '/meta',
+    route: MetaRoutes,
   },
 ]
 
