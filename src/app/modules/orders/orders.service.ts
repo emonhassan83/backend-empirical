@@ -8,6 +8,8 @@ import { Items } from '../items/items.models'
 import { ItemsService } from '../items/items.service'
 import { TOrder } from './orders.interface'
 import Product from '../product/product.models'
+import { ORDER_STATUS } from './orders.constants'
+import { PAYMENT_STATUS } from '../payment/payment.constants'
 
 const createOrders = async (payload: any) => {
   const session = await startSession()
@@ -47,9 +49,7 @@ const createOrders = async (payload: any) => {
 
     // ✅ Calculate total amount
     const totalAmount = items.reduce((sum: number, item: any) => {
-      const priceAfterDiscount =
-        item.price - (item.price * (item.discount || 0)) / 100
-      return sum + priceAfterDiscount * item.quantity
+      return sum + item.quantity * item.price
     }, 0)
 
     // ✅ Create main Order
@@ -57,9 +57,9 @@ const createOrders = async (payload: any) => {
       [
         {
           ...orderData,
-          amount: totalAmount,
-          status: 'pending',
-          paymentStatus: 'unpaid',
+          amount: totalAmount + orderData.deliveryCharge,
+          status: ORDER_STATUS.pending,
+          paymentStatus: PAYMENT_STATUS.unpaid,
         },
       ],
       { session },
@@ -118,7 +118,7 @@ const getAllOrders = async (query: Record<string, any>) => {
     Order.find().populate([
       {
         path: 'user',
-        select: 'name email id contactNo photoUrl',
+        select: 'name',
       },
     ]),
     query,

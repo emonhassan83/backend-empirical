@@ -18,6 +18,7 @@ import { User } from '../user/user.model'
 import { ORDER_STATUS } from '../orders/orders.constants'
 import { Items } from '../items/items.models'
 import { Cart } from '../cart/cart.model'
+import Product from '../product/product.models'
 
 const stripe = new Stripe(config.stripe?.stripe_api_secret as string, {
   apiVersion: '2025-02-24.acacia',
@@ -26,7 +27,7 @@ const stripe = new Stripe(config.stripe?.stripe_api_secret as string, {
 
 const initiatePayment = async (payload: TPayment) => {
   const transactionId = generateTransactionId()
-  const { userId, orderId } = payload
+  const { user: userId, order: orderId } = payload
 
   const user = await User.findById(userId)
   if (!user || user?.isDeleted) {
@@ -96,42 +97,66 @@ const confirmPayment = async (query: Record<string, any>) => {
 
   try {
     session.startTransaction()
+    
+    // 1. Update Payment Record
     const payment = await Payment.findByIdAndUpdate(
       paymentId,
       {
         isPaid: true,
         status: PAYMENT_STATUS.paid,
-        paymentIntentId: paymentIntentId,
+        paymentIntentId,
       },
-      { new: true, session },
+      { new: true, session }
     )
 
-    if (!payment) {
-      throw new AppError(httpStatus.NOT_FOUND, 'Payment Not Found!')
-    }
+    if (!payment) throw new AppError(httpStatus.NOT_FOUND, 'Payment not found!')
 
-    const orderData = await Order.findOneAndUpdate(
-      payment?.orderId,
+    // 2. Update Order Status
+    const order = await Order.findOneAndUpdate(
+      { _id: payment.order },
       {
-        transactionId: payment?.transactionId,
+        transactionId: payment.transactionId,
         paymentStatus: PAYMENT_STATUS.paid,
         status: ORDER_STATUS.processing,
       },
-      { session },
+      { new: true, session }
     )
 
     // when order confirm if order in document found then sent to user 2 mail
-    if (!orderData) {
+    if (!order) {
       throw new AppError(httpStatus.NOT_FOUND, 'Order not found!')
     }
 
-    const user = await User.findById(orderData.user)
+    // 3. Get All Items in This Order
+    const orderItems = await Items.find({ order: order._id }).session(session)
+    if (!orderItems.length) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Order items not found!')
+    }
 
-    // ✅ Get order items and remove them from Cart if type is Product
-    const orderItems = await Items.find({ order: orderData._id }).session(
-      session,
-    )
+    // 4. Loop Through Each Item → Update Product stock/sale/size
+    for (const item of orderItems) {
+      const product = await Product.findById(item.product).session(session)
+      if (!product) continue
 
+      // Reduce total stock
+      product.stock = Math.max(0, product.stock - item.quantity)
+
+      // Increase total sales count
+      product.sale = (product.sale || 0) + item.quantity
+
+      // Reduce quantity from matching size (if applicable)
+      if (product.size && product.size.length > 0) {
+        const matchedSize = product.size.find((s: any) => s.type === item.size)
+        if (matchedSize) {
+          matchedSize.quantity = Math.max(0, matchedSize.quantity - item.quantity)
+        }
+      }
+
+      await product.save({ session })
+    }
+
+    // ✅ 5. Remove purchased items from user's Cart
+    const user = await User.findById(order.user)
     if (orderItems?.length && user) {
       const cartDeletePromises = orderItems.map((item) =>
         Cart.deleteOne({
@@ -226,7 +251,7 @@ const refundPayment = async (payload: any) => {
     )
 
     // Validate and update order status
-    const order = await Order.findById(paymentData?.orderId)
+    const order = await Order.findById(paymentData?.order)
     if (!order) {
       throw new AppError(httpStatus.NOT_FOUND, 'Booking record not found')
     }
@@ -239,7 +264,7 @@ const refundPayment = async (payload: any) => {
     }
 
     await Order.findByIdAndUpdate(
-      paymentData?.orderId,
+      paymentData?.order,
       { paymentStatus: PAYMENT_STATUS.refunded },
       { new: true, session },
     )

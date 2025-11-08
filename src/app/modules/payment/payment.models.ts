@@ -13,8 +13,8 @@ const PaymentSchema: Schema = new Schema<TPayment>(
       unique: true,
       default: () => generateCryptoString(10),
     },
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    orderId: {
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    order: {
       type: Schema.Types.ObjectId,
       refPath: 'Order',
       required: [true, 'order id is required'],

@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose'
 import { TItems, TItemsModel } from './items.interface'
+import { PRODUCT_SIZE } from '../product/product.constants'
 
 const itemsSchema = new Schema<TItems>(
   {
@@ -23,7 +24,8 @@ const itemsSchema = new Schema<TItems>(
     },
     size: {
       type: String,
-      default: null,
+      enum: PRODUCT_SIZE,
+      default: PRODUCT_SIZE.free_size,
     },
   },
   {

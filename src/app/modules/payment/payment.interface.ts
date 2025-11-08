@@ -4,8 +4,8 @@ import { TPaymentStatus } from './payment.constants';
 export interface TPayment {
   _id: string
   id: string
-  userId: Types.ObjectId
-  orderId: Types.ObjectId
+  user: Types.ObjectId
+  order: Types.ObjectId
   transactionId: string
   paymentIntentId: string
   amount: number

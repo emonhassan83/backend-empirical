@@ -2,12 +2,23 @@ import { Router } from 'express'
 import { ordersController } from './orders.controller'
 import auth from '../../middleware/auth'
 import { USER_ROLE } from '../user/user.constant'
+import zodValidationRequest from '../../middleware/validateRequest'
+import { OrderValidation } from './orders.validation'
 
 const router = Router()
 
-router.post('/', ordersController.createOrders)
+router.post(
+  '/',
+  zodValidationRequest(OrderValidation.createOrderSchema),
+  ordersController.createOrders,
+)
 
-router.patch('/:id', auth(USER_ROLE.admin), ordersController.updateOrders)
+router.patch(
+  '/:id',
+  auth(USER_ROLE.admin),
+  zodValidationRequest(OrderValidation.changeStatusOrderSchema),
+  ordersController.updateOrders,
+)
 
 router.delete('/:id', auth(USER_ROLE.admin), ordersController.deleteOrders)
 
