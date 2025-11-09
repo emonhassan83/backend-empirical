@@ -8,10 +8,11 @@ import { Items } from '../items/items.models'
 import { ItemsService } from '../items/items.service'
 import { TOrder } from './orders.interface'
 import Product from '../product/product.models'
-import { ORDER_STATUS } from './orders.constants'
+import { ORDER_STATUS, TOrderStatus } from './orders.constants'
 import { PAYMENT_STATUS } from '../payment/payment.constants'
+import { orderStatusNotifyToUser } from './orders.utils'
 
-const createOrders = async (payload: any) => {
+const createOrders = async (payload: any, userId: string) => {
   const session = await startSession()
   session.startTransaction()
 
@@ -19,7 +20,7 @@ const createOrders = async (payload: any) => {
     const { items, orderData } = payload
 
     // ✅ Validate User
-    const user = await User.findById(orderData?.user).session(session)
+    const user = await User.findById(userId).session(session)
     if (!user || user.isDeleted) {
       throw new AppError(httpStatus.NOT_FOUND, 'User not found')
     }
@@ -57,6 +58,7 @@ const createOrders = async (payload: any) => {
       [
         {
           ...orderData,
+          user: userId,
           amount: totalAmount + orderData.deliveryCharge,
           status: ORDER_STATUS.pending,
           paymentStatus: PAYMENT_STATUS.unpaid,
@@ -133,12 +135,22 @@ const getAllOrders = async (query: Record<string, any>) => {
   const meta = await orderModel.countTotal()
 
   if (data?.length > 0) {
-    // Use for...of to handle asynchronous operations in a loop
-    for (const d of data) {
-      const items = await ItemsService.getItemsByOrderId(d?._id)
-      orders.push({ ...d.toObject(), items })
+    for (const order of data) {
+      const items = await Items.find({ order: order._id })
+        .populate({
+          path: 'product',
+          select: 'title images',
+        })
+        .select('product quantity price size')
+        .lean()
+
+      orders.push({
+        ...order.toObject(),
+        items,
+      })
     }
   }
+
   return { data: orders, meta }
 }
 
@@ -158,14 +170,23 @@ const getOrdersById = async (id: string) => {
   return { ...result.toObject(), items }
 }
 
-const updateOrders = async (id: string, payload: Partial<TOrder>) => {
-  const result: TOrder | null = await Order.findByIdAndUpdate(id, payload, {
-    new: true,
-  }).populate('user')
+const updateOrders = async (id: string, payload: { status: TOrderStatus }) => {
+  const { status } = payload
+
+  const result: TOrder | null = await Order.findByIdAndUpdate(
+    id,
+    { status },
+    {
+      new: true,
+    },
+  ).populate('user')
 
   if (!result) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Order updating failed')
   }
+
+  // Notify user on status change
+  await orderStatusNotifyToUser('STATUS_CHANGED', result.user, result)
 
   return result
 }

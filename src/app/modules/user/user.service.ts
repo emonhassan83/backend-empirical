@@ -73,9 +73,20 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   const result = await usersQuery.modelQuery
   const meta = await usersQuery.countTotal()
 
+  // Count active users (status: 'active')
+  const activeUserCount = await User.countDocuments({
+    isDeleted: false,
+    role: { $ne: USER_ROLE.admin },
+    status: 'active',
+  })
+
   return {
     meta,
-    result,
+    result: {
+      totalUser: meta.total,
+      activeUser: activeUserCount,
+      userList: result,
+    },
   }
 }
 

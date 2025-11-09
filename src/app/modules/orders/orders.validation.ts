@@ -37,15 +37,13 @@ const BillingDetailsSchema = z.object({
 const createOrderSchema = z.object({
   body: z.object({
     items: z.array(ItemSchema).min(1, 'At least one item is required'),
-    user: ObjectIdString,
-    amount: z
-      .number({ required_error: 'amount is required' })
-      .nonnegative('amount must be >= 0'),
-    deliveryCharge: z
-      .number()
-      .nonnegative('deliveryCharge must be >= 0')
-      .default(0),
-    billingDetails: BillingDetailsSchema,
+    orderData: z.object({
+      deliveryCharge: z
+        .number()
+        .nonnegative('deliveryCharge must be >= 0')
+        .default(0),
+      billingDetails: BillingDetailsSchema,
+    }),
   }),
 })
 

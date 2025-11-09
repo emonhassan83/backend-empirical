@@ -1,4 +1,4 @@
-import { ORDER_MODEL_TYPE, TOrder, TOrderModel } from './orders.interface'
+import { TOrder, TOrderModel } from './orders.interface'
 import { ORDER_STATUS, PAYMENT_STATUS } from './orders.constants'
 import { model, Schema } from 'mongoose'
 import { generateCryptoString } from '../../utils/generateCryptoString'

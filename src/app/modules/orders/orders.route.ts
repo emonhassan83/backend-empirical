@@ -9,6 +9,7 @@ const router = Router()
 
 router.post(
   '/',
+  auth(USER_ROLE.user),
   zodValidationRequest(OrderValidation.createOrderSchema),
   ordersController.createOrders,
 )
@@ -24,7 +25,11 @@ router.delete('/:id', auth(USER_ROLE.admin), ordersController.deleteOrders)
 
 router.get('/my-orders', auth(USER_ROLE.user), ordersController.getMyOrders)
 
-router.get('/:id', auth(USER_ROLE.admin), ordersController.getOrdersById)
+router.get(
+  '/:id',
+  auth(USER_ROLE.admin, USER_ROLE.user),
+  ordersController.getOrdersById,
+)
 
 router.get('/', auth(USER_ROLE.admin), ordersController.getAllOrders)
 

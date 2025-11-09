@@ -5,6 +5,7 @@ export enum modeType {
   User = 'User',
   Product = 'Product',
   Cart = 'Cart',
+  Order = 'Order',
   Payment = 'Payment',
 }
 

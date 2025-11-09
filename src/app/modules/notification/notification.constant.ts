@@ -13,9 +13,15 @@ export const messages = {
   cartManagement: {
     addCart: 'Cart product added !'
   },
+
+  orderManagement: {
+    statusChanged: 'Order status changed !'
+  },
+
   product: {
     added: 'Discount product added to store !',
   },
+  
   paymentManagement: {
     paymentSuccess: 'Payment was successful !',
     paymentRefunded: 'Payment refunded successfully.',

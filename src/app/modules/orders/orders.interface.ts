@@ -2,12 +2,6 @@ import { Model, Types } from 'mongoose'
 import { TUser } from '../user/user.interface'
 import { TOrderStatus, TPaymentStatus } from './orders.constants'
 
-export enum ORDER_MODEL_TYPE {
-  Product = 'Product',
-  GalleryPhotos = 'GalleryPhotos',
-  Gallery = 'Gallery',
-}
-
 export interface TOrder {
   _id?: Types.ObjectId
   id: string

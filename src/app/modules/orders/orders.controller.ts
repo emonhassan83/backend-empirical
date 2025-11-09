@@ -4,7 +4,7 @@ import sendResponse from '../../utils/sendResponse'
 import { ordersService } from './orders.service'
 
 const createOrders = catchAsync(async (req: Request, res: Response) => {
-  const result = await ordersService.createOrders(req?.body)
+  const result = await ordersService.createOrders(req?.body, req.user._id)
 
   sendResponse(res, {
     statusCode: 201,
