@@ -5,10 +5,9 @@ import { TCart } from './cart.interface'
 import { Cart } from './cart.model'
 import { User } from '../user/user.model'
 import Product from '../product/product.models'
-import { cartProductNotifyToUser } from './cart.utils'
 
 const addACartIntoDB = async (payload: TCart) => {
-  const { user: userId, product: productId } = payload
+  const { user: userId, product: productId, size, quantity } = payload
 
   // Step 1: Validate user
   const user = await User.findById(userId)
@@ -22,22 +21,51 @@ const addACartIntoDB = async (payload: TCart) => {
     throw new AppError(httpStatus.NOT_FOUND, 'Product not found or deleted!')
   }
 
-  // Step 3: Check if the product already exists in user's cart
-  const existingCartItem = await Cart.findOne({
+  // Validate size array exists
+  if (!product.size || product.size.length === 0) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'This product has no size information configured!',
+    )
+  }
+
+  // ✅ Step 3: Validate size & stock availability
+  const sizeInfo = product.size.find((s) => s.type === size)
+
+  if (!sizeInfo) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `This product does not have size: ${size}`,
+    )
+  }
+
+  if (sizeInfo.quantity < quantity) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Only ${sizeInfo.quantity} items available for size ${size}`,
+    )
+  }
+
+  // (Optional) Step 4: Prevent duplicate cart entries for same product+size
+  const existingCart = await Cart.findOne({
     user: userId,
     product: productId,
+    size,
   })
 
-  if (existingCartItem) return existingCartItem
+  if (existingCart) {
+    // corporate-friendly approach → update quantity instead of blocking
+    existingCart.quantity += quantity
+    await existingCart.save()
 
-  // Step 4: Create new cart item
+    return existingCart
+  }
+
+  // Step 5: Create cart entry
   const newCart = await Cart.create(payload)
   if (!newCart) {
     throw new AppError(httpStatus.CONFLICT, 'Cart product not added!')
   }
-
-  // Step 5: Notify user (if needed)
-  await cartProductNotifyToUser('ADDED', user, newCart)
 
   return newCart
 }
@@ -45,7 +73,6 @@ const addACartIntoDB = async (payload: TCart) => {
 const getAllCartFromDB = async (query: Record<string, unknown>) => {
   const cartQuery = new QueryBuilder(
     Cart.find().populate([
-      { path: 'user', select: 'id name email photoUrl' },
       { path: 'product' },
     ]),
     query,
@@ -55,8 +82,30 @@ const getAllCartFromDB = async (query: Record<string, unknown>) => {
     .paginate()
     .fields()
 
-  const carts = await cartQuery.modelQuery
+  let carts = await cartQuery.modelQuery
   const meta = await cartQuery.countTotal()
+
+  // ⭐ Add computed fields
+  carts = carts.map((cart: any) => {
+    const product = cart.product
+
+    const discountPrice = product
+      ? product.price - (product.price * (product.discount || 0)) / 100
+      : 0
+
+    const isStock = product?.stock > 0
+
+    const sizeInfo = product?.size?.find((s: any) => s.type === cart.size)
+
+    const sizeAvailable = sizeInfo ? sizeInfo.quantity : 0
+
+    return {
+      ...cart.toObject(),
+      discountPrice,
+      isStock,
+      sizeAvailable,
+    }
+  })
 
   return {
     meta,
@@ -66,14 +115,33 @@ const getAllCartFromDB = async (query: Record<string, unknown>) => {
 
 const getACartFromDB = async (id: string) => {
   const cart = await Cart.findById(id).populate([
-    { path: 'user', select: 'id name email photoUrl' },
     { path: 'product' },
   ])
+
   if (!cart) {
     throw new AppError(httpStatus.NOT_FOUND, 'Cart product not found')
   }
 
-  return cart
+  const product: any = cart.product
+
+  // ⭐ Compute discount price
+  const discountPrice = product
+    ? product.price - (product.price * (product.discount || 0)) / 100
+    : 0
+
+  // ⭐ Product-level stock status
+  const isStock = product?.stock > 0
+
+  // ⭐ Size-specific availability
+  const sizeInfo = product?.size?.find((s: any) => s.type === cart.size)
+  const sizeAvailable = sizeInfo ? sizeInfo.quantity : 0
+
+  return {
+    ...cart.toObject(),
+    discountPrice,
+    isStock,
+    sizeAvailable,
+  }
 }
 
 const deleteACartFromDB = async (id: string) => {
