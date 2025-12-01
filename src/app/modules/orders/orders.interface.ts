@@ -10,7 +10,7 @@ export interface TOrder {
   status: TOrderStatus
   paymentStatus: TPaymentStatus
   transactionId?: string
-  deliveryCharge: number
+  // deliveryCharge: number
   billingDetails: {
     name?: string
     email: string

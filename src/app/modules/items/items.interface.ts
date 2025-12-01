@@ -5,7 +5,6 @@ export interface TItems {
   product: Types.ObjectId
   order: Types.ObjectId | TOrder
   quantity: number
-  price: number
   size?: string
 }
 

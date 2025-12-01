@@ -48,18 +48,13 @@ const createOrders = async (payload: any, userId: string) => {
       }
     }
 
-    // ✅ Calculate total amount
-    const totalAmount = items.reduce((sum: number, item: any) => {
-      return sum + item.quantity * item.price
-    }, 0)
-
     // ✅ Create main Order
     const createdOrder = await Order.create(
       [
         {
           ...orderData,
           user: userId,
-          amount: totalAmount + orderData.deliveryCharge,
+          amount: payload.orderData.amount,
           status: ORDER_STATUS.pending,
           paymentStatus: PAYMENT_STATUS.unpaid,
         },
@@ -86,17 +81,6 @@ const createOrders = async (payload: any, userId: string) => {
     if (!createdItems?.length) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create order items')
     }
-
-    // // ✅ Update Product stock and sale count
-    // for (const item of items) {
-    //   await Product.findByIdAndUpdate(
-    //     item.product,
-    //     {
-    //       $inc: { stock: -item.quantity, sale: item.quantity },
-    //     },
-    //     { session, new: true },
-    //   )
-    // }
 
     await session.commitTransaction()
     session.endSession()

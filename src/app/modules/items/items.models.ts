@@ -18,10 +18,10 @@ const itemsSchema = new Schema<TItems>(
       type: Number,
       required: [true, 'Quantity is required'],
     },
-    price: {
-      type: Number,
-      required: [true, 'Price is required'],
-    },
+    // price: {
+    //   type: Number,
+    //   required: [true, 'Price is required'],
+    // },
     size: {
       type: String,
       enum: PRODUCT_SIZE,
