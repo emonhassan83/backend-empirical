@@ -19,16 +19,17 @@ const ItemSchema = z.object({
 
 // Billing details
 const BillingDetailsSchema = z.object({
-  name: z.string().min(1, 'name is required'),
-  address: z.string().min(1, 'address is required'),
+  name: z.string().min(1, 'name is required').optional(),
+  address: z.string().min(1, 'address is required').optional(),
   phoneNumber: z
     .string()
     .min(6, 'phoneNumber seems too short')
-    .max(30, 'phoneNumber seems too long'),
-  email: z.string().email('invalid email'),
+    .max(30, 'phoneNumber seems too long').optional(),
+  email: z.string().email('invalid email').optional(),
   zipCode: z.union([z.number(), z.string()]).optional(), // allow number or string zip (coerce upstream if needed)
-  city: z.string().min(1, 'city is required'),
-  country: z.string().min(1, 'country is required'),
+  city: z.string().min(1, 'city is required').optional(),
+  country: z.string().min(1, 'country is required').optional(),
+  note: z.string().min(1, 'note is required').optional(),
 })
 
 // Order data
