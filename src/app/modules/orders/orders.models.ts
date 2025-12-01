@@ -33,7 +33,6 @@ const orderSchema = new Schema<TOrder>(
         phoneNumber: { type: String, default: null },
         email: {
           type: String,
-          required: [true, 'billing email is required'],
           default: null,
         },
         zipCode: { type: Number, default: null },
