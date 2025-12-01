@@ -1,10 +1,5 @@
 import { Model, Types } from 'mongoose'
 
-type TGlobalPrice = {
-  eachPrice: number
-  totalPrice: number
-}
-
 export interface TContents {
   _id?: string
   aboutUs?: string
@@ -14,6 +9,7 @@ export interface TContents {
   philosophyImage?: string
   philosophyAboutUs?: string
   philosophyImpact?: string
+  deliveryCharge?: number
   createdBy: Types.ObjectId
   isDeleted?: boolean
 }

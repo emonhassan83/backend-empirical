@@ -41,6 +41,7 @@ const seedContents = async () => {
       philosophyImage: null,
       philosophyAboutUs: '',
       philosophyImpact: '',
+      deliveryCharge: 0,
       createdBy: admin?._id,
     })
 
