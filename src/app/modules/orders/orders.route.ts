@@ -21,7 +21,7 @@ router.patch(
   ordersController.updateOrders,
 )
 
-router.delete('/:id', auth(USER_ROLE.admin), ordersController.deleteOrders)
+router.delete('/:id',   auth(USER_ROLE.admin, USER_ROLE.user), ordersController.deleteOrders)
 
 router.get('/my-orders', auth(USER_ROLE.user), ordersController.getMyOrders)
 
@@ -31,6 +31,10 @@ router.get(
   ordersController.getOrdersById,
 )
 
-router.get('/', auth(USER_ROLE.admin), ordersController.getAllOrders)
+router.get(
+  '/',
+  auth(USER_ROLE.admin),
+  ordersController.getAllOrders,
+)
 
 export const OrdersRoutes = router
