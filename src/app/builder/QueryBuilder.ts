@@ -59,10 +59,6 @@ class QueryBuilder<T> {
           [field]: { $gte: min, $lte: max } as any,
         };
         this.modelQuery = this.modelQuery.find(filter);
-      } else {
-        // Handle invalid range values if needed
-        //@ts-ignore
-        console.warn(`Invalid range value for field ${field}: ${range}`);
       }
     }
     return this;
