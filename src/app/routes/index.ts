@@ -12,6 +12,7 @@ import { CartRoutes } from '../modules/cart/cart.route'
 import { OrdersRoutes } from '../modules/orders/orders.route'
 import { PaymentRoutes } from '../modules/payment/payment.route'
 import { MetaRoutes } from '../modules/meta/meta.route'
+import { InquireRoutes } from '../modules/inquire/inquire.route'
 
 const router = Router()
 
@@ -55,6 +56,10 @@ const moduleRoutes = [
   {
     path: '/events',
     route: EventRoutes,
+  },
+  {
+    path: '/inquires',
+    route: InquireRoutes,
   },
   {
     path: '/contents',

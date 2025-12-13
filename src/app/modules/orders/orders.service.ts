@@ -101,7 +101,10 @@ const getAllOrders = async (query: Record<string, any>) => {
   const orders: any[] = []
 
   const orderModel = new QueryBuilder(
-    Order.find().populate([
+    Order.find({
+      isDeleted: false,
+      status: { $ne: ORDER_STATUS.pending },
+    }).populate([
       {
         path: 'user',
         select: 'name',
