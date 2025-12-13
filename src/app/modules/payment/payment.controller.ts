@@ -18,9 +18,9 @@ const createPayment = catchAsync(async (req: Request, res: Response) => {
 const confirmPayment = catchAsync(async (req: Request, res: Response) => {
   const result = await paymentService.confirmPayment(req.query)
 
-  //  res.redirect(
-  //   `${config.payment_success_url}`,
-  // )
+   res.redirect(
+    `${config.payment_success_url}`,
+  )
   
   sendResponse(res, {
     success: true,

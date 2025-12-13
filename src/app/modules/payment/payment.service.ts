@@ -34,11 +34,6 @@ const initiatePayment = async (payload: TPayment) => {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found!')
   }
 
-  //* checking if the user is blocked
-  if (user?.status === 'blocked') {
-    throw new AppError(httpStatus.FORBIDDEN, 'Your account is blocked !')
-  }
-
   // Determine model type and fetch associated data
   const order = await Order.findById(orderId)
   if (!order || order?.isDeleted) {
@@ -97,7 +92,7 @@ const confirmPayment = async (query: Record<string, any>) => {
 
   try {
     session.startTransaction()
-    
+
     // 1. Update Payment Record
     const payment = await Payment.findByIdAndUpdate(
       paymentId,
@@ -106,7 +101,7 @@ const confirmPayment = async (query: Record<string, any>) => {
         status: PAYMENT_STATUS.paid,
         paymentIntentId,
       },
-      { new: true, session }
+      { new: true, session },
     )
 
     if (!payment) throw new AppError(httpStatus.NOT_FOUND, 'Payment not found!')
@@ -119,7 +114,7 @@ const confirmPayment = async (query: Record<string, any>) => {
         paymentStatus: PAYMENT_STATUS.paid,
         status: ORDER_STATUS.processing,
       },
-      { new: true, session }
+      { new: true, session },
     )
 
     // when order confirm if order in document found then sent to user 2 mail
@@ -148,7 +143,10 @@ const confirmPayment = async (query: Record<string, any>) => {
       if (product.size && product.size.length > 0) {
         const matchedSize = product.size.find((s: any) => s.type === item.size)
         if (matchedSize) {
-          matchedSize.quantity = Math.max(0, matchedSize.quantity - item.quantity)
+          matchedSize.quantity = Math.max(
+            0,
+            matchedSize.quantity - item.quantity,
+          )
         }
       }
 
@@ -157,15 +155,10 @@ const confirmPayment = async (query: Record<string, any>) => {
 
     // ✅ 5. Remove purchased items from user's Cart
     const user = await User.findById(order.user)
-    if (orderItems?.length && user) {
-      const cartDeletePromises = orderItems.map((item) =>
-        Cart.deleteOne({
-          user: user._id,
-          reference: item.product,
-        }).session(session),
-      )
-
-      await Promise.all(cartDeletePromises)
+    if (user) {
+      await Cart.deleteMany({
+        user: user._id,
+      }).session(session)
     }
 
     // sent notify to user when payment is success
