@@ -26,7 +26,6 @@ const stripe = new Stripe(config.stripe?.stripe_api_secret as string, {
 })
 
 const initiatePayment = async (payload: TPayment) => {
-  const transactionId = generateTransactionId()
   const { user: userId, order: orderId } = payload
 
   const user = await User.findById(userId)
@@ -39,6 +38,7 @@ const initiatePayment = async (payload: TPayment) => {
   if (!order || order?.isDeleted) {
     throw new AppError(httpStatus.NOT_FOUND, 'Order not found!')
   }
+  const transactionId = generateTransactionId()
 
   // Always set the total amount
   payload.amount = order.amount
@@ -69,6 +69,10 @@ const initiatePayment = async (payload: TPayment) => {
       amount: paymentData.amount,
       name: 'Order Payment',
       quantity: 1,
+    },
+    customer: {
+      name: user.name,
+      email: user.email,
     },
     paymentId: paymentData._id,
   })

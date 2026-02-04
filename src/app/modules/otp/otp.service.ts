@@ -56,7 +56,7 @@ const verifyOtp = async (token: string, otp: string | number) => {
       },
     },
     { new: true },
-  ).select('email _id username role')
+  ).select('email _id name role')
 
   const jwtPayload = {
     _id: updateUser?._id as Types.ObjectId,
@@ -90,7 +90,7 @@ const resendOtp = async (email: string) => {
         verification: {
           otp,
           expiresAt,
-          status: false,
+          status: true,
         },
       },
     },
