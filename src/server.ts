@@ -5,6 +5,7 @@ import config from './app/config'
 import { errorlogger, logger } from './app/utils/logger'
 import initializeSocketIO from './socket'
 import { seeder } from './app/seeder/seed'
+import colors from 'colors';
 
 let server: Server
 export const io = initializeSocketIO(createServer(app))
@@ -16,17 +17,27 @@ async function main() {
     logger.info('Connected to database')
 
     // set here default task
-    seeder.seedAdmin()
-    seeder.seedContents()
+    await Promise.all([
+      seeder.seedAdmin(),
+      seeder.seedContents()
+    ])
 
     server = app.listen(Number(config.port), config.ip as string, () => {
-      console.log(`app is listening on port ${config.port}`)
-      logger.info(`app is listening on port ${config.port}`)
+      console.log(
+        colors.italic.green.bold(
+          `💫 Simple Server Listening on  http://${config?.ip}:${config.port} `,
+        ),
+      );
+      logger.info(`app is listening on  http://${config?.ip}:${config.port}`)
     })
 
     io.listen(Number(config.socket_port))
-    console.log(`Socket is listening on port ${config.socket_port}`)
-    logger.info(`Socket is listening on port ${config.socket_port}`)
+    console.log(
+      colors.yellow.bold(
+        `⚡Socket.io running on  http://${config.ip}:${config.socket_port}`,
+      ),
+    );
+    logger.info(`Socket is listening on http://${config.ip}:${config.socket_port}`)
 
     //@ts-ignore
     global.socketio = io
