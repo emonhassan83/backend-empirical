@@ -72,7 +72,9 @@ const getAllProduct = async (queries: Record<string, any> = {}) => {
   data = data.map((p: any) => ({
     ...p.toObject(),
     isStock: p.stock > 0,
-    discountPrice: p.price - (p.price * (p.discount || 0)) / 100,
+    discountPrice: parseFloat(
+      (p.price - (p.price * (p.discount || 0)) / 100).toFixed(2)
+    ),
   }))
 
   return {
@@ -93,8 +95,12 @@ const getProductById = async (id: string): Promise<any> => {
   return {
     ...productObj,
     isStock: productObj.stock > 0,
-    discountPrice:
-      productObj.price - (productObj.price * (productObj.discount || 0)) / 100,
+    discountPrice: parseFloat(
+      (
+        productObj.price -
+        (productObj.price * (productObj.discount || 0)) / 100
+      ).toFixed(2)
+    ),
   }
 }
 
