@@ -7,16 +7,16 @@ const createValidationSchema = z.object({
       .string()
       .min(10, 'Description must be at least 10 characters long'),
     date: z.string({
-      required_error: 'Date is required',
+      error: 'Date is required',
     }),
     time: z
       .string({
-        required_error: 'Time is required',
+        error: 'Time is required',
       })
       .min(3, 'time must be at least 3 characters long'),
     location: z
       .string({
-        required_error: 'Location is required',
+        error: 'Location is required',
       })
       .min(3, 'Location must be at least 3 characters long'),
   }),
@@ -30,7 +30,7 @@ const updateValidationSchema = z.object({
       .optional(),
     thumbnail: z
       .string({
-        required_error: 'Article thumbnail photo is required! ',
+        error: 'Article thumbnail photo is required! ',
       })
       .url()
       .optional(),
@@ -40,18 +40,18 @@ const updateValidationSchema = z.object({
       .optional(),
     date: z
       .string({
-        required_error: 'Date is required',
+        error: 'Date is required',
       })
       .optional(),
     time: z
       .string({
-        required_error: 'Time is required',
+        error: 'Time is required',
       })
       .min(3, 'time must be at least 3 characters long')
       .optional(),
     location: z
       .string({
-        required_error: 'Location is required',
+        error: 'Location is required',
       })
       .min(3, 'Location must be at least 3 characters long')
       .optional(),

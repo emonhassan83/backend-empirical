@@ -4,28 +4,28 @@ import { PRODUCT_SIZE } from './product.constants'
 const createProductSchema = z.object({
   body: z.object({
     title: z.string({
-      required_error: 'Product title is required!',
+      error: 'Product title is required!',
     }),
     description: z
       .string({
-        required_error: 'Description is required!',
+        error: 'Description is required!',
       })
       .min(10, 'Description must be at least 10 characters long'),
     stock: z
       .number({
-        required_error: 'Stock is required!',
+        error: 'Stock is required!',
       })
       .int('Stock must be an integer!')
       .min(1, 'Stock must be at least 1')
       .optional(),
     price: z
       .number({
-        required_error: 'Price is required!',
+        error: 'Price is required!',
       })
       .positive('Price must be a positive number'),
     discount: z
       .number({
-        required_error: 'Discount is required!',
+        error: 'Discount is required!',
       })
       .min(0, 'Discount cannot be negative')
       .max(100, 'Discount cannot exceed 100%')
@@ -33,7 +33,7 @@ const createProductSchema = z.object({
     size: z.array(
       z.object({
         type: z.enum(Object.values(PRODUCT_SIZE) as [string, ...string[]], {
-          required_error: 'Product size is required!',
+          error: 'Product size is required!',
         }),
         quantity: z
           .number()
@@ -56,7 +56,7 @@ const updateProductSchema = z.object({
         z.object({
           type: z
             .enum(Object.values(PRODUCT_SIZE) as [string, ...string[]], {
-              required_error: 'Product size is required!',
+              error: 'Product size is required!',
             })
             .optional(),
           quantity: z.number().min(1).optional(),

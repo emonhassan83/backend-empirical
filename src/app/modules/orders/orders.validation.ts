@@ -11,10 +11,10 @@ const ObjectIdString = z
 const ItemSchema = z.object({
   product: ObjectIdString,
   quantity: z
-    .number({ required_error: 'quantity is required' })
+    .number({ error: 'quantity is required' })
     .int('quantity must be an integer')
     .positive('quantity must be greater than 0'),
-  size: z.string({ required_error: 'size is required' }),
+  size: z.string({ error: 'size is required' }),
 })
 
 // Billing details
@@ -24,7 +24,8 @@ const BillingDetailsSchema = z.object({
   phoneNumber: z
     .string()
     .min(6, 'phoneNumber seems too short')
-    .max(30, 'phoneNumber seems too long').optional(),
+    .max(30, 'phoneNumber seems too long')
+    .optional(),
   email: z.string().email('invalid email').optional(),
   zipCode: z.union([z.number(), z.string()]).optional(), // allow number or string zip (coerce upstream if needed)
   city: z.string().min(1, 'city is required').optional(),
@@ -38,7 +39,7 @@ const createOrderSchema = z.object({
     items: z.array(ItemSchema).min(1, 'At least one item is required'),
     orderData: z.object({
       amount: z
-        .number({ required_error: 'Total amount is required!' })
+        .number({ error: 'Total amount is required!' })
         .positive('amount must be greater than 0'),
       billingDetails: BillingDetailsSchema,
     }),
@@ -49,7 +50,7 @@ const createOrderSchema = z.object({
 const changeStatusOrderSchema = z.object({
   body: z.object({
     status: z.enum(Object.values(ORDER_STATUS) as [string, ...string[]], {
-      required_error: 'Order status is required!',
+      error: 'Order status is required!',
     }),
   }),
 })

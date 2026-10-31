@@ -5,7 +5,7 @@ const loginValidationSchema = z.object({
     email: z.string(),
     password: z
       .string({
-        invalid_type_error: 'Password must be a string',
+        error: 'Password must be a string',
       })
       .min(6, { message: 'Password must be at least 6 characters' })
       .max(12, { message: 'Password cannot be more than 12 characters' }),
@@ -16,12 +16,12 @@ const changePasswordValidationSchema = z.object({
   body: z.object({
     oldPassword: z
       .string({
-        required_error: 'Old password is required',
+        error: 'Old password is required',
       })
       .min(6, { message: 'Password must be at least 6 characters' })
       .max(12, { message: 'Password cannot be more than 12 characters' }),
     newPassword: z
-      .string({ required_error: 'Password is required' })
+      .string({ error: 'Password is required' })
       .min(6, { message: 'Password must be at least 6 characters' })
       .max(12, { message: 'Password cannot be more than 12 characters' }),
   }),
@@ -30,7 +30,7 @@ const changePasswordValidationSchema = z.object({
 const refreshTokenValidationSchema = z.object({
   cookies: z.object({
     refreshToken: z.string({
-      required_error: 'Refresh token is required!',
+      error: 'Refresh token is required!',
     }),
   }),
 })
@@ -38,7 +38,7 @@ const refreshTokenValidationSchema = z.object({
 const forgetPasswordValidationSchema = z.object({
   body: z.object({
     email: z.string({
-      required_error: 'User email is required!',
+      error: 'User email is required!',
     }),
   }),
 })
@@ -46,17 +46,17 @@ const forgetPasswordValidationSchema = z.object({
 const resetPasswordValidationSchema = z.object({
   body: z.object({
     email: z.string({
-      required_error: 'User email is required!',
+      error: 'User email is required!',
     }),
     newPassword: z
       .string({
-        required_error: 'User new password is required!',
+        error: 'User new password is required!',
       })
       .min(6, { message: 'Password must be at least 6 characters' })
       .max(12, { message: 'Password cannot be more than 12 characters' }),
     confirmPassword: z
       .string({
-        required_error: 'User confirm password is required!',
+        error: 'User confirm password is required!',
       })
       .min(6, { message: 'Password must be at least 6 characters' })
       .max(12, { message: 'Password cannot be more than 12 characters' }),

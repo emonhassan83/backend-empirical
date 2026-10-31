@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
-import { AnyZodObject } from 'zod'
+import { z } from 'zod'
 import catchAsync from '../utils/catchAsync'
 
-const zodValidationRequest = (schema: AnyZodObject) => {
+const zodValidationRequest = (schema: z.ZodType) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     // validation
     await schema.parseAsync({
